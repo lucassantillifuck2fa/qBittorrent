@@ -32,13 +32,12 @@
 #include <QPushButton>
 
 #include "base/bittorrent/session.h"
-#include "base/preferences.h"
 #include "uithememanager.h"
 #include "utils.h"
 
 using namespace Qt::Literals::StringLiterals;
 
-DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const int torrentsCount, const QString &name, const bool defaultDeleteFiles)
+DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const int torrentsCount, const QString &name)
     : QDialog(parent)
     , m_ui {new Ui::DeletionConfirmationDialog}
 {
@@ -53,27 +52,38 @@ DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const in
     const QSize iconSize = Utils::Gui::largeIconSize();
     m_ui->labelWarning->setPixmap(UIThemeManager::instance()->getIcon(u"dialog-warning"_s).pixmap(iconSize));
     m_ui->labelWarning->setFixedWidth(iconSize.width());
-    m_ui->rememberBtn->setIcon(UIThemeManager::instance()->getIcon(u"object-locked"_s));
-    m_ui->rememberBtn->setIconSize(Utils::Gui::mediumIconSize());
-    connect(m_ui->rememberBtn, &QCheckBox::clicked, this, [this]
+
+    // Enforce specific button ordering across all platforms
+    m_ui->buttonBox->setButtonLayoutPolicy(QDialogButtonBox::LeftToRight);
+
+    // 1. Delete torrent and content (Red / Destructive)
+    auto *btnRemoveTorrentAndContent = new QPushButton(tr("Remove torrent and content"), this);
+    btnRemoveTorrentAndContent->setStyleSheet(u"QPushButton { background-color: #d9534f; color: white; font-weight: bold; border-radius: 3px; padding: 5px 10px; }"
+                                               "QPushButton:hover { background-color: #c9302c; }"
+                                               "QPushButton:pressed { background-color: #ac2925; }"_s);
+    m_ui->buttonBox->addButton(btnRemoveTorrentAndContent, QDialogButtonBox::ActionRole);
+
+    // 2. Delete torrent only
+    auto *btnRemoveTorrent = new QPushButton(tr("Remove torrent"), this);
+    m_ui->buttonBox->addButton(btnRemoveTorrent, QDialogButtonBox::ActionRole);
+
+    // Connect custom action buttons
+    connect(btnRemoveTorrentAndContent, &QPushButton::clicked, this, [this]
     {
-        Preferences::instance()->setRemoveTorrentContent(m_ui->checkRemoveContent->isChecked());
-        m_ui->rememberBtn->setEnabled(false);
+        m_removeContent = true;
+        accept();
     });
 
-    const bool removeTorrentContent = defaultDeleteFiles || Preferences::instance()->removeTorrentContent();
-    m_ui->checkRemoveContent->setChecked(removeTorrentContent);
-    connect(m_ui->checkRemoveContent, &QCheckBox::clicked, this, [this]
+    connect(btnRemoveTorrent, &QPushButton::clicked, this, [this]
     {
-        const bool removeTorrentContent = m_ui->checkRemoveContent->isChecked();
-        m_ui->rememberBtn->setEnabled(removeTorrentContent != Preferences::instance()->removeTorrentContent());
-        m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeTorrentContent ? tr("Remove torrent and content") : tr("Remove torrent"));
+        m_removeContent = false;
+        accept();
     });
-    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeTorrentContent ? tr("Remove torrent and content") : tr("Remove torrent"));
-    m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setFocus();
 
-    connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
+    // 3. Cancel (handled via QDialogButtonBox native rejection signal)
     connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+
+    m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setFocus();
 }
 
 DeletionConfirmationDialog::~DeletionConfirmationDialog()
@@ -83,5 +93,5 @@ DeletionConfirmationDialog::~DeletionConfirmationDialog()
 
 bool DeletionConfirmationDialog::isRemoveContentSelected() const
 {
-    return m_ui->checkRemoveContent->isChecked();
+    return m_removeContent;
 }
