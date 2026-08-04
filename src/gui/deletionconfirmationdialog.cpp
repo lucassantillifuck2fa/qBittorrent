@@ -41,6 +41,7 @@ using namespace Qt::Literals::StringLiterals;
 DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const int torrentsCount, const QString &name, const bool defaultDeleteFiles)
     : QDialog(parent)
     , m_ui {new Ui::DeletionConfirmationDialog}
+    , m_removeContent {defaultDeleteFiles || Preferences::instance()->removeTorrentContent()}
 {
     m_ui->setupUi(this);
 
@@ -53,24 +54,9 @@ DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const in
     const QSize iconSize = Utils::Gui::largeIconSize();
     m_ui->labelWarning->setPixmap(UIThemeManager::instance()->getIcon(u"dialog-warning"_s).pixmap(iconSize));
     m_ui->labelWarning->setFixedWidth(iconSize.width());
-    m_ui->rememberBtn->setIcon(UIThemeManager::instance()->getIcon(u"object-locked"_s));
-    m_ui->rememberBtn->setIconSize(Utils::Gui::mediumIconSize());
-    connect(m_ui->rememberBtn, &QCheckBox::clicked, this, [this]
-    {
-        Preferences::instance()->setRemoveTorrentContent(m_ui->checkRemoveContent->isChecked());
-        m_ui->rememberBtn->setEnabled(false);
-    });
 
-    const bool removeTorrentContent = defaultDeleteFiles || Preferences::instance()->removeTorrentContent();
-    m_ui->checkRemoveContent->setChecked(removeTorrentContent);
-    connect(m_ui->checkRemoveContent, &QCheckBox::clicked, this, [this]
-    {
-        const bool removeTorrentContent = m_ui->checkRemoveContent->isChecked();
-        m_ui->rememberBtn->setEnabled(removeTorrentContent != Preferences::instance()->removeTorrentContent());
-        m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeTorrentContent ? tr("Remove torrent and content") : tr("Remove torrent"));
-    });
-    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(removeTorrentContent ? tr("Remove torrent and content") : tr("Remove torrent"));
-    m_ui->buttonBox->button(QDialogButtonBox::Cancel)->setFocus();
+    // Set button text based on default removal preference
+    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(m_removeContent ? tr("Remove torrent and content") : tr("Remove torrent"));
 
     connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
     connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
@@ -83,5 +69,5 @@ DeletionConfirmationDialog::~DeletionConfirmationDialog()
 
 bool DeletionConfirmationDialog::isRemoveContentSelected() const
 {
-    return m_ui->checkRemoveContent->isChecked();
+    return m_removeContent;
 }
