@@ -436,13 +436,14 @@ void TransferListWidget::deleteSelectedTorrents(const bool deleteLocalFiles)
 
     if (Preferences::instance()->confirmTorrentDeletion())
     {
-        auto *dialog = new DeletionConfirmationDialog(this, torrents.size(), torrents[0]->name(), deleteLocalFiles);
+        auto *dialog = new DeletionConfirmationDialog(this, torrents.size(), torrents[0]->name());
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         connect(dialog, &DeletionConfirmationDialog::accepted, this, [this, dialog]()
         {
             // Some torrents might be removed when waiting for user input, so refetch the torrent list
             // NOTE: this will only work when dialog is modal
-            removeTorrents(getSelectedTorrents(), dialog->isRemoveContentSelected());
+            const bool isDeleteFileSelected = (dialog->userChoice() == DeletionConfirmationDialog::DeleteTorrentAndFiles);
+            removeTorrents(getSelectedTorrents(), isDeleteFileSelected);
         });
         dialog->open();
     }
@@ -459,13 +460,14 @@ void TransferListWidget::deleteVisibleTorrents()
 
     if (Preferences::instance()->confirmTorrentDeletion())
     {
-        auto *dialog = new DeletionConfirmationDialog(this, torrents.size(), torrents[0]->name(), false);
+        auto *dialog = new DeletionConfirmationDialog(this, torrents.size(), torrents[0]->name());
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         connect(dialog, &DeletionConfirmationDialog::accepted, this, [this, dialog]()
         {
             // Some torrents might be removed when waiting for user input, so refetch the torrent list
             // NOTE: this will only work when dialog is modal
-            removeTorrents(getVisibleTorrents(), dialog->isRemoveContentSelected());
+            const bool isDeleteFileSelected = (dialog->userChoice() == DeletionConfirmationDialog::DeleteTorrentAndFiles);
+            removeTorrents(getVisibleTorrents(), isDeleteFileSelected);
         });
         dialog->open();
     }
