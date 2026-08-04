@@ -44,12 +44,19 @@ class DeletionConfirmationDialog final : public QDialog
     Q_DISABLE_COPY_MOVE(DeletionConfirmationDialog)
 
 public:
-    DeletionConfirmationDialog(QWidget *parent, int torrentsCount, const QString &name, bool defaultDeleteFiles);
+    enum DeletionConfirmation
+    {
+        DeleteTorrentAndFiles,
+        DeleteTorrentOnly,
+        Cancel
+    };
+
+    DeletionConfirmationDialog(QWidget *parent, int torrentsCount, const QString &name);
     ~DeletionConfirmationDialog() override;
 
-    bool isRemoveContentSelected() const;
+    DeletionConfirmation userChoice() const;
 
 private:
     Ui::DeletionConfirmationDialog *m_ui = nullptr;
-    bool m_removeContent = false;
+    DeletionConfirmation m_choice = Cancel;
 };
