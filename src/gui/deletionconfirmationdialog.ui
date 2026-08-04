@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>463</width>
+    <width>480</width>
     <height>128</height>
    </rect>
   </property>
@@ -46,9 +46,6 @@
        <property name="text">
         <string notr="true">message goes here</string>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
-       </property>
        <property name="wordWrap">
         <bool>true</bool>
        </property>
@@ -60,6 +57,17 @@
     <layout class="QHBoxLayout" name="buttonLayout">
      <item>
       <widget class="QPushButton" name="deleteContentButton">
+       <property name="font">
+        <font>
+         <bold>false</bold>
+         <kerning>true</kerning>
+        </font>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: rgb(255, 125, 125);
+color: rgb(255, 255, 255);
+selection-background-color: rgb(250, 74, 74);</string>
+       </property>
        <property name="text">
         <string>Remove torrent and content</string>
        </property>
@@ -67,6 +75,12 @@
      </item>
      <item>
       <widget class="QPushButton" name="deleteTorrentButton">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="text">
         <string>Remove torrent only</string>
        </property>
@@ -74,8 +88,26 @@
      </item>
      <item>
       <widget class="QPushButton" name="cancelButton">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>100</width>
+         <height>30</height>
+        </size>
+       </property>
        <property name="text">
         <string>Cancel</string>
+       </property>
+       <property name="default">
+        <bool>true</bool>
        </property>
       </widget>
      </item>
