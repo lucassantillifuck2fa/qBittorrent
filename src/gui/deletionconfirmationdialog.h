@@ -51,4 +51,5 @@ public:
 
 private:
     Ui::DeletionConfirmationDialog *m_ui = nullptr;
+    bool m_removeContent = false;
 };
