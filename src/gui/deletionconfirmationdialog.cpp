@@ -31,17 +31,14 @@
 
 #include <QPushButton>
 
-#include "base/bittorrent/session.h"
-#include "base/preferences.h"
 #include "uithememanager.h"
 #include "utils.h"
 
 using namespace Qt::Literals::StringLiterals;
 
-DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const int torrentsCount, const QString &name, const bool defaultDeleteFiles)
+DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const int torrentsCount, const QString &name)
     : QDialog(parent)
     , m_ui {new Ui::DeletionConfirmationDialog}
-    , m_removeContent {defaultDeleteFiles || Preferences::instance()->removeTorrentContent()}
 {
     m_ui->setupUi(this);
 
@@ -55,11 +52,20 @@ DeletionConfirmationDialog::DeletionConfirmationDialog(QWidget *parent, const in
     m_ui->labelWarning->setPixmap(UIThemeManager::instance()->getIcon(u"dialog-warning"_s).pixmap(iconSize));
     m_ui->labelWarning->setFixedWidth(iconSize.width());
 
-    // Set button text based on default removal preference
-    m_ui->buttonBox->button(QDialogButtonBox::Ok)->setText(m_removeContent ? tr("Remove torrent and content") : tr("Remove torrent"));
+    // Connect button signals
+    connect(m_ui->deleteContentButton, &QPushButton::clicked, this, [this]()
+    {
+        m_choice = DeleteTorrentAndFiles;
+        accept();
+    });
 
-    connect(m_ui->buttonBox, &QDialogButtonBox::accepted, this, &QDialog::accept);
-    connect(m_ui->buttonBox, &QDialogButtonBox::rejected, this, &QDialog::reject);
+    connect(m_ui->deleteTorrentButton, &QPushButton::clicked, this, [this]()
+    {
+        m_choice = DeleteTorrentOnly;
+        accept();
+    });
+
+    connect(m_ui->cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 }
 
 DeletionConfirmationDialog::~DeletionConfirmationDialog()
@@ -67,7 +73,7 @@ DeletionConfirmationDialog::~DeletionConfirmationDialog()
     delete m_ui;
 }
 
-bool DeletionConfirmationDialog::isRemoveContentSelected() const
+DeletionConfirmationDialog::DeletionConfirmation DeletionConfirmationDialog::userChoice() const
 {
-    return m_removeContent;
+    return m_choice;
 }
