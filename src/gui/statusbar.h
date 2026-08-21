@@ -66,6 +66,8 @@ private:
     void updateFreeDiskSpaceVisibility();
     void updateExternalAddressesLabel();
     void updateExternalAddressesVisibility();
+    void updatePortLabel();
+    void updatePortVisibility();
     void updateSpeedLabels();
 
     QPushButton *m_dlSpeedLbl = nullptr;
