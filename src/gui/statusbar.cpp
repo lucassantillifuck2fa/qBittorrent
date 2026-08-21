@@ -146,6 +146,7 @@ StatusBar::StatusBar(QWidget *parent)
     addPermanentWidget(m_upSpeedLbl);
 
     updateExternalAddressesVisibility();
+    updatePortVisibility();
 
     refresh();
     connect(session, &BitTorrent::Session::statsUpdated, this, &StatusBar::refresh);
@@ -290,6 +291,7 @@ void StatusBar::refresh()
     updateConnectionStatus();
     updateDHTNodesNumber();
     updateExternalAddressesLabel();
+    updatePortLabel();
     updateSpeedLabels();
 }
 
@@ -321,4 +323,5 @@ void StatusBar::optionsSaved()
 {
     updateFreeDiskSpaceVisibility();
     updateExternalAddressesVisibility();
+    updatePortVisibility();
 }
